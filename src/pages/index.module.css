@@ -21,3 +21,9 @@
   align-items: center;
   justify-content: center;
 }
+
+.heroLogo {
+  margin: auto;
+  max-width: 300px;
+  width: 100%;
+}
