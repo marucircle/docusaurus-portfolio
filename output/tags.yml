@@ -1,0 +1,9 @@
+develop:
+  label: 開発
+  permalink: /develop
+  description: 開発系での学び
+
+frontend:
+  label: フロントエンド
+  permalink: /frontend
+  description: フロントエンド系の学び
