@@ -31,6 +31,7 @@ export default function Home(): JSX.Element {
       <HomepageHeader />
       <main>
         <HomepageFeatures />
+        <div>トップページには自分の詳細情報を簡単に書きたい</div>
       </main>
     </Layout>
   )

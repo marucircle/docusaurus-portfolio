@@ -1,5 +1,6 @@
 import { themes as prismThemes } from 'prism-react-renderer'
 import type { Config } from '@docusaurus/types'
+import type { Options as DocsOptions } from '@docusaurus/plugin-content-docs'
 import type * as Preset from '@docusaurus/preset-classic'
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
@@ -30,6 +31,19 @@ const config: Config = {
     defaultLocale: 'ja',
     locales: ['ja'],
   },
+  plugins: [
+    [
+      'content-docs',
+      {
+        id: 'artifact', //成果物載せるところのイメージ
+        path: 'artifact',
+        routeBasePath: 'artifact',
+        sidebarPath: './sidebars.ts',
+        showLastUpdateAuthor: true,
+        showLastUpdateTime: true,
+      } satisfies DocsOptions,
+    ],
+  ],
 
   presets: [
     [
@@ -37,6 +51,8 @@ const config: Config = {
       {
         docs: {
           sidebarPath: './sidebars.ts',
+          path: 'output',
+          routeBasePath: 'output',
         },
         blog: {
           showReadingTime: true,
@@ -54,7 +70,7 @@ const config: Config = {
       } satisfies Preset.Options,
     ],
   ],
-
+  themes: ['@docusaurus/theme-live-codeblock'],
   themeConfig: {
     // Replace with your project's social card
     image: 'img/docusaurus-social-card.jpg',
@@ -66,32 +82,36 @@ const config: Config = {
       items: [
         {
           type: 'docSidebar',
-          sidebarId: 'tutorialSidebar',
+          sidebarId: 'outputSidebar',
           position: 'left',
-          label: 'Tutorial',
+          label: 'Output',
         },
         { to: '/blog', label: 'Blog', position: 'left' },
-        {
-          href: 'https://github.com/facebook/docusaurus',
-          label: 'GitHub',
-          position: 'right',
-        },
+        { to: '/artifact/intro', label: 'Artifact', position: 'left' },
       ],
     },
     footer: {
       style: 'dark',
       links: [
         {
-          title: 'Docs',
+          title: 'Contents',
           items: [
             {
-              label: 'Tutorial',
-              to: '/docs/intro',
+              label: 'Output',
+              to: '/output/intro',
+            },
+            {
+              label: 'Artifact',
+              to: '/artifact/intro',
+            },
+            {
+              label: 'Blog',
+              to: '/blog',
             },
           ],
         },
         {
-          title: 'Community', //TODO リンク修正
+          title: 'SNS', //TODO リンク修正
           items: [
             {
               label: 'Qiita',
@@ -110,10 +130,6 @@ const config: Config = {
         {
           title: 'More',
           items: [
-            {
-              label: 'Blog',
-              to: '/blog',
-            },
             {
               label: 'GitHub Repository',
               href: '#',

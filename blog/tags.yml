@@ -1,19 +1,9 @@
-facebook:
-  label: Facebook
-  permalink: /facebook
-  description: Facebook tag description
+hobby:
+  label: 趣味
+  permalink: /hobby
+  description: まるの趣味について書いたやつ
 
-hello:
-  label: Hello
-  permalink: /hello
-  description: Hello tag description
-
-docusaurus:
-  label: Docusaurus
-  permalink: /docusaurus
-  description: Docusaurus tag description
-
-hola:
-  label: Hola
-  permalink: /hola
-  description: Hola tag description
+output:
+  label: 学び
+  permalink: /output
+  description: 学んだこととか書いたやつ
