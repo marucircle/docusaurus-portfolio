@@ -23,6 +23,7 @@ const getAllDirectories = (dirPath, directories = []) => {
 }
 
 const blogFolders = getAllDirectories('./blog')
+const currentDate = new Date()
 
 module.exports = [
   {
@@ -36,5 +37,11 @@ module.exports = [
     name: 'fileName',
     message: 'ファイル名を入力(ディレクトリが未作成の場合は合わせて入力):',
     validate: (input) => (input ? true : 'ファイル名の入力が必要'),
+  },
+  {
+    type: 'input',
+    name: 'createdAt',
+    default: currentDate.toISOString(),
+    message: '日付を生成...（Enter）',
   },
 ]

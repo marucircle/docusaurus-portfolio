@@ -3,6 +3,11 @@ develop:
   permalink: /develop
   description: 開発系での学び
 
+test:
+  label: テスト
+  permalink: /test
+  description: テスト系での学び
+
 frontend:
   label: フロントエンド
   permalink: /frontend

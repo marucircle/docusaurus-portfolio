@@ -36,3 +36,8 @@
 .hero {
   padding: 1.5rem;
 }
+
+.codeBlock_VPrp {
+  /*コードブロックのスクロール用 */
+  max-height: 1000px;
+}
