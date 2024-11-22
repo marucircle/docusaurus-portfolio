@@ -112,19 +112,19 @@ const config: Config = {
           ],
         },
         {
-          title: 'SNS', //TODO リンク修正
+          title: 'SNS',
           items: [
             {
               label: 'Qiita',
-              href: '#',
+              href: 'https://qiita.com/marumaru0113',
             },
             {
               label: 'X',
-              href: '#',
+              href: 'https://x.com/marucircle1133',
             },
             {
               label: 'GitHub',
-              href: '#',
+              href: 'https://github.com/marucircle',
             },
           ],
         },
@@ -133,7 +133,7 @@ const config: Config = {
           items: [
             {
               label: 'GitHub Repository',
-              href: '#',
+              href: 'https://github.com/marucircle/docusaurus-portfolio',
             },
           ],
         },
