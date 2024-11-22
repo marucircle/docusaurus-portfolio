@@ -13,7 +13,8 @@
     "write-translations": "docusaurus write-translations",
     "write-heading-ids": "docusaurus write-heading-ids",
     "typecheck": "tsc",
-    "preinstall": "npx only-allow pnpm"
+    "preinstall": "npx only-allow pnpm",
+    "gen-md": "hygen generator markdown"
   },
   "dependencies": {
     "@docusaurus/core": "3.6.2",
