@@ -43,6 +43,7 @@ const config: Config = {
         showLastUpdateTime: true,
       } satisfies DocsOptions,
     ],
+    'docusaurus-plugin-sass',
   ],
 
   presets: [
