@@ -1,10 +1,10 @@
 ---
-to: <%= type %>/<%= fileName %>.mdx
+to: <%= directory %>/<%= fileName %>.mdx
 ---
 
 ---
-slug: template
-title: テンプレート
+slug: blog-template
+title: Blogテンプレート
 tags: [hobby, output]
 sidebar_position: 1
 ---
