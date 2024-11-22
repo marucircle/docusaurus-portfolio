@@ -7,3 +7,8 @@ output:
   label: 学び
   permalink: /output
   description: 学んだこととか書いたやつ
+
+diary:
+  label: 日記
+  permalink: /diary
+  description: 日記とか落書き系。
