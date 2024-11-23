@@ -1,0 +1,162 @@
+---
+slug: ts-loader-build-error
+title: ts-loaderのビルドエラーで詰まったメモ
+tags: [develop, frontend]
+sidebar_position: 1
+---
+
+import TOCInline from '@theme/TOCInline'
+
+テスト用ライブラリ（jestだとか、testing-libraryだとか）の更新作業を行なった際に、意図しないビルドエラーが発生した。
+
+テスト用のライブラリしか更新していないはずなのになぜ？？というところから調査スタート。
+
+<!-- truncate -->
+
+## 目次インライン
+
+<TOCInline toc={toc} minHeadingLevel={2} maxHeadingLevel={4} />
+
+## 実際に更新したバージョン
+
+以下のライブラリ更新を実施。
+
+- ts-jest: v26.0.0 -> v29.16
+- testing-library/dom: v8.11.1 -> v10.4.0
+- testing-library/jest-dom: v5.16.1 -> v6.4.8
+- testing-library/react: v12.1.2 -> v12.1.4
+- jest: v26.4.2 -> v29.1.5
+- @types/jest: v26.0.14 -> v29.5.12
+
+## 発生したエラー
+
+以下が実際に発生したエラー。
+
+```
+ERROR in ./src/index.tsx
+#12 4.479 Module build failed (from ./node_modules/ts-loader/index.js):
+#12 4.479 Error: Debug Failure. False expression: Non-string value passed to `ts.resolveTypeReferenceDirective`,
+likely by a wrapping package working with an outdated `resolveTypeReferenceDirectives` signature.
+This is probably not a problem in TS itself.
+#12 4.479     at Object.resolveTypeReferenceDirective (/node_modules/typescript/lib/typescript.js:43500:18)
+```
+
+重要なのは以下の部分。
+
+```
+#12 4.479 Error: Debug Failure. False expression: Non-string value passed to `ts.resolveTypeReferenceDirective`,
+likely by a wrapping package working with an outdated `resolveTypeReferenceDirectives` signature.
+ This is probably not a problem in TS itself.
+```
+
+意味的には「TypeReferenceDirectiveを解決しようとするモジュールに古いものがあるんじゃね？多分TypeScript自体は悪くないよ。」という感じ。だと思ってる。
+
+## とりあえずエラーの解決方法を探す
+
+TypeReferenceDirectiveとは何かを調べた。
+
+一旦詳細は省くが、おそらく[コレ](https://www.typescriptlang.org/docs/handbook/triple-slash-directives.html#-reference-types-)のこと。
+
+<b>
+  これ自体が悪さをしているわけではないが、これを解決する何らかのライブラリが、typescriptのバージョンをサポートできない程度に古いことが悪さをしている可能性が高そう。
+</b>
+
+ただ、今回更新したライブラリにそれらしいものはない。。。
+
+という認識だが、ライブラリを更新した際に何らかの依存関係があるライブラリが更新されてしまっているのでは？
+
+## yarn.lockファイルを眺めて依存関係の更新を調べる
+
+yarn.lockって何ーってのはこの辺りの記事がわかりやすかった。
+
+https://zenn.dev/luvmini511/articles/56bf98f0d398a5
+
+とはいえyarn.lockを調べるにしても数万行のものを虱潰しに調べているのでは時間がいくらあっても足りんので、仮説を立てて調べる。
+
+> これ自体が悪さをしているわけではないが、これを解決する何らかのライブラリが、Typescriptのバージョンをサポートできない程度に古いことが悪さをしている可能性が高そう。
+
+と書いたが、もしかすると<b>Typescriptのバージョンが勝手に更新されて、それを解決しようとするライブラリのバージョンが追いついていない可能性がある？</b>という仮説で調査。
+
+調査したところ、yarn.lockの記述では<b>Typescriptのバージョンが`v4.5.4`から`v4.9.5`に更新されている</b>ことを確認。
+
+package.jsonに記載しているバージョンは`^4.0.4`という感じで、v4の中であれば依存関係に合わせて自動的にバージョンを更新するようになっていたので気づけなかった。
+
+## ライブラリのリリースノートを調べる
+
+てわけでTypeScriptのバージョンが勝手に変わっていることに原因がありそうなので、TypeScriptのリリースノートを調査する。
+
+- [GitHub](https://github.com/microsoft/TypeScript/releases)
+- [公式ドキュメント](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-5-5.html)
+
+リリースノートも情報に溢れているので、「TypeReferenceDirective」、「reference」、「directive」あたりをキーワードにして調査。
+
+調査したところ、[v4.7のリリースノート](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-7.html#resolution-mode)に気になる記述を発見。
+
+従来からあったTripleSlashDirectiveでパッケージを参照する際に、その解決方法を明示できるようになった？感じと解釈。
+
+超あやふやだが、一旦重要なのは「typescriptのv4.7にて今回のエラーに関わっていそうな変更が加わっている」かつ、「今回のtypescriptのバージョン更新差分には、このv4.7が含まれている」ということ。
+
+## 原因ぽいライブラリのバージョン固定
+
+てわけでtypescriptのバージョンが原因くさいので、一度バージョンを勝手に更新されないようにresolutionで固定する。
+
+```
+  ...
+  },
+  "resolutions": {
+    "typescript": "4.5.4"
+  }
+```
+
+この状態でパッケージを再度インストールしなおしたところ、ビルドが通るようになった。
+
+## 根本解決をしたい
+
+ただ、これだとtypescriptのバージョンが今後もずっとv4.5.4で固定されるままだし、またバージョン更新を行おうとする際に同じ目に遭う予感。
+
+元々エラーメッセージにも「TypeScriptが原因ではない」とあったので、再度別路線で調査を行う。
+
+## TypeScriptに依存していそうなパッケージを探す
+
+本来依存関係のあるパッケージは勝手にバージョンが更新されるものだが、メジャーバージョンを跨ぐようなケースについては自動更新がされないようになっているので、この辺りで更新漏れのパッケージが発生している予感。
+
+というわけで目をつけたのが「ts-loader」というパッケージ。
+
+というのも、「resolveTypeReferenceDirective」と検索をかけると大概「ts-node」か「ts-loader」についての記事ばかり見つかるため。
+
+そのうち、ts-loaderについてはpackage.jsonにバージョンを明示していたので。
+
+## ts-loaderのリリースノートを調べる
+
+TypeScriptほど膨大ではないが、とはいえやはりリリースノートは情報の多い場所なので、こちらもヤマを張って調べる。TypeScriptに関係している箇所を調べるので「TypeScript」や「typeReferenceDirective」でページ内検索をかけて調査。
+
+で、調査した結果[関係していそうなリリースノート](https://github.com/TypeStrong/ts-loader/blob/main/CHANGELOG.md#v840)を発見。
+
+> fix: cater for change in resolveTypeReferenceDirective API in 4.7
+
+と記載があり、明確にv4.7に追従する変更を加えたとの記載がある。
+
+## ts-loaderのバージョンを変更してみる
+
+というわけでTypeScriptのバージョン固定は外し、ts-loaderのバージョン変更を実施。
+
+結果、v8.3.0未満ではビルドが落ちるが、v8.4.0にするとビルドが通ることを確認。
+
+## 調査結果のまとめ
+
+### 根本原因
+
+- TypeScriptのバージョンが依存関係更新の際に変わっていたことが原因だった。（v4.5.4 -> v4.9.5）
+- TypeScriptのバージョン更新の中には、他のライブラリに関わる更新が加わっており、その依存関係がうまく解決されていなかった。（今回の場合はv4.7のtypeReferenceに関わる変更）
+- 依存関係がうまく解決されていなかったライブラリはts-loaderで、原因はv7からv8へのメジャーバージョンアップを要するものだったため。
+
+### 対応
+
+- ts-loaderのバージョンをv8.4.0に更新
+
+##　今回の調査で分かったこと
+
+- リリースノートは情報の宝庫、ちゃんと見るべき。ただし、ページ内検索などで情報の取捨選択はすること。
+- 思わぬ依存関係の更新が原因となることもあるので、yarn.lockを眺めることで有益な情報が得られることもある。
+
+おわり。

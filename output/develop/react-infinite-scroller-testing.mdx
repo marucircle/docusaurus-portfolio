@@ -1,0 +1,179 @@
+---
+slug: react-infinite-scroller-testing
+title: react-infinite-scrollerの無限スクロールテストで詰んだお話
+tags: [develop, frontend, test]
+sidebar_position: 1
+---
+
+import TOCInline from '@theme/TOCInline'
+
+react-infinite-scrollerと呼ばれるライブラリを使っている箇所のテストで詰んだ時の備忘録
+
+<!-- truncate -->
+
+<TOCInline toc={toc} minHeadingLevel={2} maxHeadingLevel={4} />
+
+## 技術スタック想定
+
+- [react-infinite-scroller](https://github.com/danbovey/react-infinite-scroller)
+- [react](https://github.com/facebook/react)
+- [graphql（Apollo Client）](https://github.com/apollographql/apollo-client)
+- [jest](https://github.com/jestjs/jest)
+- [react-testing-library](https://github.com/testing-library/react-testing-library)
+
+## MockedProviderを使った無限スクロールのモック方法
+
+```ts
+import { MockedProvider } from "@apollo/client/testing";
+import { render, screen, waitFor } from "@testing-library/react";
+import { setupOffsetParent } from "./testUtils";
+import { NameList } from ".";
+// query名などはsampleなので適当
+
+const firstResponse = {
+  cursor: "dummyNextCursor",
+  list: [
+    {
+      id: 1,
+      name: "Maru",
+    },
+    {
+      id: 2,
+      name: "Bob",
+    },
+  ],
+};
+
+//1回目フェッチ検知用
+const mockFirstResponse = jest.fn().mockReturnValue({
+  data: {
+    getNameList: firstResponse,
+  },
+});
+
+const secondResponse = {
+  cursor: null,
+  list: [
+    {
+      id: 3,
+      name: "Jeff",
+    },
+    {
+      id: 4,
+      name: "Jun",
+    },
+  ],
+};
+
+//2回目フェッチ検知用
+const mockSecondResponse = jest.fn().mockReturnValue({
+  data: {
+    getNameList: secondResponse,
+  },
+});
+
+//後で記載するが、react-infinite-scrollerを機能させるためにいくつかモックが必要
+setupOffsetParent();
+const graphqlMocks = [
+  {
+    request: {
+      query: getNameListDocument,
+      variables: {
+        data: {
+          cursor: null,
+        },
+      },
+    },
+    result: mockFirstResponse,
+    delay: 500, //ページネーションの回数を正確に検知するために、1回目と2回目のフェッチにdelayをかける
+  },
+  {
+    request: {
+      query: getNameListDocument,
+      variables: {
+        data: {
+          cursor: "dummyNextCursor", //2回目のリクエストではcursorが飛ぶ想定
+        },
+      },
+    },
+    result: mockSecondResponse,
+    delay: 500, //ページネーションの回数を正確に検知するために、1回目と2回目のフェッチにdelayをかける
+  },
+];
+
+//ここには記載しないが、addTypeNameとfieldPoliciesの設定が別途必要な場合がある
+render(
+  <MockedProvider mocks={graphqlMocks}>
+    <NameList />
+  </MockedProvider>,
+);
+
+//1回目のフェッチ検知
+await waitFor(() => {
+  expect(mockFirstResponse).toHaveBeenCalledTimes(1);
+});
+expect(mockSecondResponse).toHaveBeenCalledTimes(0);
+
+//ページングは続いているので、ローディング表示は続いている感じ
+expect(await screen.findByText("LOADING...")).toBeInTheDocument(); //表示確認(ケースによってアサーションは変える)
+
+expect((await screen.findAllByRole("row")).length).toEqual(
+  firstResponse.list.length + 1,
+);
+
+//loading表示が消えるまで待つ。消えた際に2回目のフェッチが行われたか検知
+await waitFor(() => {
+  expect(screen.queryByText("LOADING...")).not.toBeInTheDocument();
+});
+expect(mockSecondResponse).toHaveBeenCalledTimes(1);
+
+//2回目のフェッチ完了後に表示は変わったのかチェック（内容は場合によって変更）
+expect((await screen.findAllByRole("row")).length).toEqual(
+  firstResponse.list.length + secondResponse.list.length + 1,
+);
+```
+
+### メモ
+
+- 1回目と2回目の結果を別々にjest.fn()でモックしており、これをアサーションに使用している
+- 1回目と2回目の結果が同時に処理されてしまう（正確には、テスト環境なので超少ない時間に順番に処理され、アサーションが正しく機能しなくなる場合がある）ことを避けるためにdelayを付与する
+- waitForとqueryBy〇〇のコンボで「表示されなくなるまで」のテストができる（これ色んなケースで使えるけど忘れがちなので覚えときたい）
+
+## react-infinite-scrollerが機能する方法と注意点
+
+- [react-infinite-scrollerの内部実装](https://github.com/danbovey/react-infinite-scroller/blob/master/src/InfiniteScroll.js#L149)
+- [jestでのテストでは「offsetParent」がundefinedとなる](https://github.com/jsdom/jsdom/issues/1261)
+
+react-infinite-scrollerの使用上、各要素のoffsetParentが存在していない場合機能してくれないです。
+
+その上、jestでテストする場合はなんとoffsetParentがundefinedとなるのが普通らしい。
+
+なので、react-infinite-scrollerをjest上で機能させる場合、offsetParentをモックさせることが必須となります。
+
+テストするだけなんで、値は適当です。offsetTopだけ0にしちゃえばOK。（そもそもoffsetParent自体が大抵の場合Body要素になるはずなので）
+
+```ts
+//infinite scrollを起動させるためにoffsetParentのモックが必要
+export const setupOffsetParent = () => {
+  Object.defineProperty(HTMLElement.prototype, 'offsetParent', {
+    get() {
+      return { ...this.parentNode, offsetTop: 0 }
+    },
+  })
+}
+```
+
+## ここまでやって思ったこと
+
+infinite scrollのテストしたいけど、E2Eにはしたくない
+そもそもテストしたいことは
+
+- cursorが存在する場合は次のデータをフェッチする
+- cursorがnullになったらフェッチをやめてローディング表示も消える
+
+というところを見たい
+これだけならQueryのモックとtesting libraryでいけると思ってるが...
+
+でも、領域としてはE2Eにした方が適切なんだろうなぁ。
+
+だから多分Cypressとか使った方がよっぽど早いっす。そもそもjestの性質で無限スクロールを実行するのに必要な要素が消えちゃうのが問題なので。
