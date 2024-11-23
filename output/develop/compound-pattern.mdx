@@ -1,0 +1,147 @@
+---
+slug: compound-pattern
+title: Compound Patternを活かしたいメモ
+tags: [develop, frontend]
+sidebar_position: 1
+---
+
+import TOCInline from '@theme/TOCInline'
+
+コンポーネント作成時にCompound Patternを効果的に使えると良さげな感じがしたので備忘録。
+
+<!-- truncate -->
+
+<TOCInline toc={toc} minHeadingLevel={2} maxHeadingLevel={4} />
+
+## Compound Patternとは？
+
+[参考記事](https://zenn.dev/morinokami/books/learning-patterns-1/viewer/compound-pattern)<br/>
+Reactでコンポーネントを作成するデザインパターンの１つ。
+
+## コード例（Component側）
+
+```ts
+import { FC, Fragment } from 'react';
+import { css } from '@emotion/core';
+
+type ModalSubComponentsType = {
+  Content: typeof Content;
+  Overlay: typeof Overlay;
+};
+
+export const Modal: FC & ModalSubComponentsType = ({ children }) => {
+  return <Fragment>{children}</Fragment>;
+};
+
+type ContentProps = {
+  width?: number;
+  height?: number;
+  backgroundColor?: string;
+};
+
+const Content: FC<ContentProps> = ({
+  children,
+  width,
+  height,
+  backgroundColor = '#fff',
+}) => {
+
+  return (
+    <div
+      css={[
+        css`
+          display: flex;
+          flex-direction: column;
+          row-gap: 20px;
+          background: ${backgroundColor};
+          left: 50%;
+          position: fixed;
+          top: 50%;
+          transform: translate(-50%, -50%);
+          width: ${width ? `${width}px` : 'auto'};
+          height: ${height ? `${height}px` : 'auto'};
+          z-index: 10;
+        `,
+      ]}
+    >
+      {children}
+    </div>
+  );
+};
+
+type OverlayProps = {
+  onClick: () => void;
+  backgroundColor?: string;
+  opacity?: number;
+};
+const Overlay: FC<OverlayProps> = ({ onClick, backgroundColor = '#000', opacity = 0.5 }) => {
+  return (
+    <div
+      onClick={onClick}
+      css={css`
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1;
+        background-color: ${backgroundColor};
+        opacity: ${opacity};
+        width: 100vw;
+        height: 100vh;
+      `}
+    />
+  );
+};
+
+PlainModal.Content = Content;
+PlainModal.Overlay = Overlay
+```
+
+## コード例（コンポーネント使用側）
+
+```ts
+import { FC } from 'react';
+import { PlainModal } from './PlainModal';
+
+export const BlockWorkerModal: FC = () => {
+  return (
+    <PlainModal>
+      <PlainModal.Content height={500} width={500}>
+        Modal Content
+      </PlainModal.Content>
+      <PlainModal.Overlay onClick={onClose} />
+    </PlainModal>
+  );
+};
+```
+
+## 使って感じたこと
+
+１つのコンポーネントでありながら、部位ごとにさらに別々のコンポーネントに分けられる。
+
+これによって、特定のコンポーネントへの紐づけは維持しながら、複数のコンポーネントに責務とコードを分割することができ、コードの認知負荷も抑えられる感じ。
+
+Propsについても分割後のコンポーネントごとに分けることができるのは良さそう。
+
+（うーんでもPropsについてはそもそも１つのコンポーネントに対して分ける必要があるほどのPropsを用意するべきでない、となりそうだけど）
+
+ただし、そのコンポーネントを使う上である程度のマニュアルが必要になりそうな感じ。
+
+このデザインパターンを使う場合、コンポーネントの使用側は分割後のコンポーネントの適切な配置を知っておくことが前提条件となるので、そこはコンポーネントの命名を工夫したり、何かしらのドキュメントを置いておくなどの配慮があるとよいかも。
+
+（もしくは、どこに配置しても問題ないようなパーツが複数あるようなコンポーネントにこそ採用すべき...と思ったが、そのレベルであればCompound Patternを使うまでもなく共通コンポーネントとして作成しておくべき感じ。）
+
+## 使うべき場面は...
+
+例えば、<b>ある程度レイアウトが決まっているが、内部の要素に対して自由度をある程度持たせたいようなコンポーネント。</b>
+
+あるコンポーネントに対して１つのヘッダー、１つのボディ、１つのフッターがあるとして、それぞれのレイアウト・配置は使いまわしたいような場合とか。
+
+もしくはそういった<b>セクション分けはできるが、使用するケースによっては一部のレイアウトが不要になるようなケース。</b>
+
+例えば上記のコード例のように、モーダルであればDialogとOverlayの２つにコンポーネントを分けておき、Overlayは必要な時だけ配置するとか。
+
+「childrenで内部の要素を自由に決められる分、コンポーネントの使用側でレイアウトも定義しないといけないコンポーネント」
+
+「そのコンポーネントは呼び出すだけで使えるが、自由度が低くて内部の要素も一部テキストくらいしか変えられないコンポーネント」
+
+これらを両極端とすると、Compound Patternはちょうどその中心位に位置するもので、「<b>コンポーネントの目的と自由度をバランスよく持つこができるデザインパターン</b>」というのが個人的な感覚。
