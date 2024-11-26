@@ -20,6 +20,9 @@ importers:
       '@docusaurus/theme-live-codeblock':
         specifier: ^3.6.2
         version: 3.6.2(@docusaurus/plugin-content-docs@3.6.2(@mdx-js/react@3.1.0(@types/react@18.3.12)(react@18.3.1))(acorn@6.4.2)(eslint@9.14.0(jiti@1.21.6))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.6.3))(@mdx-js/react@3.1.0(@types/react@18.3.12)(react@18.3.1))(acorn@6.4.2)(eslint@9.14.0(jiti@1.21.6))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.6.3)
+      '@gracefullight/docusaurus-plugin-microsoft-clarity':
+        specifier: ^1.0.0
+        version: 1.0.0(acorn@6.4.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.6.3)
       '@mdx-js/react':
         specifier: ^3.0.0
         version: 3.1.0(@types/react@18.3.12)(react@18.3.1)
@@ -1252,6 +1255,9 @@ packages:
   '@eslint/plugin-kit@0.2.2':
     resolution: {integrity: sha512-CXtq5nR4Su+2I47WPOlWud98Y5Lv8Kyxp2ukhgFx/eW6Blm18VXJO5WuQylPugRo8nbluoi6GvvxBLqHcvqUUw==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+
+  '@gracefullight/docusaurus-plugin-microsoft-clarity@1.0.0':
+    resolution: {integrity: sha512-tOFMgF8GdWL4VgdkuPiT/mDYbi4GgtOpq4hVWCg4O3XfSUd7TNGSrzNXnLiOzcO64gQSrBMpB3aQwIpi4gshdw==}
 
   '@hapi/hoek@9.3.0':
     resolution: {integrity: sha512-/c6rf4UJlmHlC9b5BaNvzAcFv7HZ2QHaV0D4/HNlBdvFnvQq8RI4kYdhyPCl7Xj+oWvTWQ8ujhqS53LIgAe6KQ==}
@@ -7691,6 +7697,20 @@ snapshots:
   '@eslint/plugin-kit@0.2.2':
     dependencies:
       levn: 0.4.1
+
+  '@gracefullight/docusaurus-plugin-microsoft-clarity@1.0.0(acorn@6.4.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.6.3)':
+    dependencies:
+      '@docusaurus/utils-validation': 3.6.2(acorn@6.4.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.6.3)
+    transitivePeerDependencies:
+      - '@swc/core'
+      - acorn
+      - esbuild
+      - react
+      - react-dom
+      - supports-color
+      - typescript
+      - uglify-js
+      - webpack-cli
 
   '@hapi/hoek@9.3.0': {}
 

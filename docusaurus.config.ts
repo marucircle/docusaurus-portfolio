@@ -20,9 +20,9 @@ const config: Config = {
   // If you aren't using GitHub pages, you don't need these.
   organizationName: 'marucircle', // Usually your GitHub org/user name.
   projectName: 'docusaurus-portfolio', // Usually your repo name.
-  
-  onBrokenLinks: "throw",
-  onBrokenMarkdownLinks: "warn",
+
+  onBrokenLinks: 'throw',
+  onBrokenMarkdownLinks: 'warn',
 
   // Even if you don't use internationalization, you can use this field to set
   // useful metadata like html lang. For example, if your site is Chinese, you
@@ -44,11 +44,15 @@ const config: Config = {
       } satisfies DocsOptions,
     ],
     'docusaurus-plugin-sass',
+    [
+      '@gracefullight/docusaurus-plugin-microsoft-clarity',
+      { projectId: 'p4d6ihmft8' },
+    ],
   ],
 
   presets: [
     [
-      "classic",
+      'classic',
       {
         docs: {
           sidebarPath: './sidebars.ts',
@@ -58,7 +62,7 @@ const config: Config = {
         blog: {
           showReadingTime: true,
           feedOptions: {
-            type: ["rss", "atom"],
+            type: ['rss', 'atom'],
             xslt: true,
           },
           onInlineTags: 'warn',
@@ -66,7 +70,16 @@ const config: Config = {
           onUntruncatedBlogPosts: 'warn',
         },
         theme: {
-          customCss: "./src/css/custom.css",
+          customCss: './src/css/custom.css',
+        },
+        googleTagManager: {
+          //MEMO google-analyticsとの接続に使用 アナリティクス等の大元の管理となる ref:https://docusaurus.io/docs/api/plugins/@docusaurus/plugin-google-tag-manager
+          containerId: 'GTM-T9SF62HB',
+        },
+        gtag: {
+          //MEMO google-analyticsとの接続に使用 アナリティクスの計測に使用する必要がある ref:https://docusaurus.io/docs/api/plugins/@docusaurus/plugin-google-gtag
+          trackingID: 'G-349GH54ZVV',
+          anonymizeIP: true,
         },
       } satisfies Preset.Options,
     ],
@@ -74,7 +87,7 @@ const config: Config = {
   themes: ['@docusaurus/theme-live-codeblock'],
   themeConfig: {
     // Replace with your project's social card
-    image: "img/docusaurus-social-card.jpg",
+    image: 'img/docusaurus-social-card.jpg',
     navbar: {
       logo: {
         alt: 'My Site Logo',
@@ -92,7 +105,7 @@ const config: Config = {
       ],
     },
     footer: {
-      style: "dark",
+      style: 'dark',
       links: [
         {
           title: 'Contents',
@@ -129,7 +142,7 @@ const config: Config = {
           ],
         },
         {
-          title: "More",
+          title: 'More',
           items: [
             {
               label: 'GitHub Repository',
