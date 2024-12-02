@@ -1,0 +1,141 @@
+---
+slug: reading-vite6.0
+title: vite6.0のアナウンスを読む
+tags: [develop, frontend]
+sidebar_position: 1
+---
+
+import TOCInline from '@theme/TOCInline'
+
+vite6.0が来るらしいので、どんな更新が入るのかを見てみる
+
+<!-- truncate -->
+
+<TOCInline toc={toc} minHeadingLevel={2} maxHeadingLevel={4} />
+
+## Vite 6.０が来るらしい
+
+https://vite.dev/blog/announcing-vite6
+
+> It has been an eventful year. Vite adoption keeps growing, with npm downloads per week jumping from 7.5 million to 17 million since the release of Vite 5 a year ago
+
+> 今年は波乱に富んだ年でした。Vite の採用は増え続けており、1 年前の Vite 5 のリリース以来、npm のダウンロード数は週あたり 750 万から 1,700 万に急増しています。
+
+すごい！（小並感）
+
+大学生活が終わって今の会社に入社した頃に話題になり始めてるな〜って記憶で止まってしまってた。もう一般的なビルドツールになってるのね。。。ちゃんとアンテナ張らないと。。
+
+一応使っていたこともあったけど、まだまだWebpackを使っているような所も多くて保守管理とかはViteあんまり見かけなかった記憶。
+
+## 重要なメジャーアップデートらしい
+
+> Vite 6 is the most significant major release since Vite 2. We're eager to partner with the ecosystem to keep expanding our shared commons through new APIs and, as usual, a more polished base upon which to build.
+
+> Vite 6 は、Vite 2 以来最も重要なメジャーリリースです。私たちは、エコシステムと提携して、新しいAPIと、いつものように、より洗練された基盤を通じて共有地を拡大し続けたいと考えています。
+
+## マイグレーションガイド
+
+https://vite.dev/guide/migration.html
+
+### Environment API
+
+https://vite.dev/guide/api-environment
+
+元々は「Vite Runtime API」というものだったらしい。
+
+### Level 3 title
+
+#### Level 4 title
+
+## コードブロック
+
+```jsx title="/src/components/HelloCodeTitle.js"
+function HelloCodeTitle(props) {
+  return <h1>Hello, {props.name}</h1>
+}
+```
+
+```js
+console.log('Every repo must come with a mascot.')
+```
+
+### コードのハイライト
+
+```js
+function HighlightSomeText(highlight) {
+  if (highlight) {
+    // highlight-next-line
+    return 'This text is highlighted!'
+  }
+
+  return 'Nothing highlighted'
+}
+
+function HighlightMoreText(highlight) {
+  // highlight-start
+  if (highlight) {
+    return 'This range is highlighted!'
+  }
+  // highlight-end
+
+  return 'Nothing highlighted'
+}
+;``
+```
+
+### ライブエディタ
+
+```jsx live
+function Clock(props) {
+  const [date, setDate] = useState(new Date())
+  useEffect(() => {
+    const timerID = setInterval(() => tick(), 1000)
+
+    return function cleanup() {
+      clearInterval(timerID)
+    }
+  })
+
+  function tick() {
+    setDate(new Date())
+  }
+
+  return (
+    <div>
+      <h2>It is {date.toLocaleTimeString()}.</h2>
+    </div>
+  )
+}
+```
+
+### 注記
+
+:::note
+
+Some **content** with _Markdown_ `syntax`. Check [this `api`](#).
+
+:::
+
+:::tip
+
+Some **content** with _Markdown_ `syntax`. Check [this `api`](#).
+
+:::
+
+:::info
+
+Some **content** with _Markdown_ `syntax`. Check [this `api`](#).
+
+:::
+
+:::warning
+
+Some **content** with _Markdown_ `syntax`. Check [this `api`](#).
+
+:::
+
+:::danger
+
+Some **content** with _Markdown_ `syntax`. Check [this `api`](#).
+
+:::
