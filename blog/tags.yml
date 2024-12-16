@@ -12,3 +12,8 @@ diary:
   label: 日記
   permalink: /diary
   description: 日記とか落書き系。
+
+moya:
+  label: もやもや
+  permalink: /moya
+  description: もやもやしたことを書いたやつ
