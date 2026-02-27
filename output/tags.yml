@@ -12,3 +12,13 @@ frontend:
   label: フロントエンド
   permalink: /frontend
   description: フロントエンド系の学び
+
+memo:
+  label: メモ
+  permalink: /memo
+  description: メモ
+
+auth:
+  label: 認証
+  permalink: /auth
+  description: 認証系の学び
